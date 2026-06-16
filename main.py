@@ -26,7 +26,7 @@ elif not konsole_service:
         "❌ Error: This script must be run directly inside an active KDE Konsole window."
     )
 else:
-    # 1. Natively split the window vertically (Defaults to 50:50 distribution)
+    # 1. Natively split the window vertically (Added stdout redirect to hide 'true')
     subprocess.run(
         [
             dbus_cmd,
@@ -34,14 +34,14 @@ else:
             "/konsole/MainWindow_1",
             "org.kde.KMainWindow.activateAction",
             "split-view-left-right",
-        ]
+        ],
+        stdout=subprocess.DEVNULL,
     )
 
-    # Give Konsole a tiny millisecond slice to parse the split layout
     time.sleep(0.1)
 
     # 2. Shift the split ratio from 50:50 to roughly 70:30
-    # We call Konsole's 'shrink-active-view' command sequentially to slide the border rightward
+    # Added stdout redirect here to prevent the 12 lines of 'true' spamming your prompt
     for _ in range(8):
         subprocess.run(
             [
@@ -50,7 +50,8 @@ else:
                 "/konsole/MainWindow_1",
                 "org.kde.KMainWindow.activateAction",
                 "shrink-active-view",
-            ]
+            ],
+            stdout=subprocess.DEVNULL,
         )
 
     # 3. Locate the session ID assigned to the right-hand split pane
@@ -72,12 +73,14 @@ else:
     sidebar_path = os.path.join(script_dir, "sidebar.py")
     active_python = sys.executable
 
+    # Added stdout redirect to clean up final execution response
     subprocess.run(
         [
             dbus_cmd,
             konsole_service,
             session_path,
             "org.kde.konsole.Session.runCommand",
-            f"{active_python} {sidebar_path}",
-        ]
+            f"{active_python} {sidebar_path}; exit",
+        ],
+        stdout=subprocess.DEVNULL,
     )
