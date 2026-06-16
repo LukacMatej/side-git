@@ -42,7 +42,7 @@ else:
 
     # 2. Shift the split ratio from 50:50 to roughly 70:30
     # We call Konsole's 'shrink-active-view' command sequentially to slide the border rightward
-    for _ in range(12):
+    for _ in range(8):
         subprocess.run(
             [
                 dbus_cmd,
