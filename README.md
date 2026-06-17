@@ -1,4 +1,4 @@
-# gitsidebar
+# side-git
 
 A small, always-on git status panel for KDE Konsole. Run it from inside a repo and it splits your Konsole tab, dropping a live-updating branch/staged/unstaged/unpushed view into the new pane, with one-key actions for the things you do most.
 
