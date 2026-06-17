@@ -313,10 +313,24 @@ class SidebarApp(App):
         try:
             repo = self.get_repo()
             repo.git.checkout("-b", name)
-            self.git_widget.update_status()
-            self.notifier.show_alert(f"Switched to new branch: {name}", "success")
         except Exception as e:
             self.notifier.show_alert(f"Failed to create branch: {e}", "error")
+            return
+
+        self.git_widget.update_status()
+
+        try:
+            repo.git.push("--set-upstream", "origin", name)
+            self.notifier.show_alert(
+                f"Created '{name}' and tracking origin/{name}", "success"
+            )
+        except Exception as e:
+            self.notifier.show_alert(
+                f"Branch '{name}' created locally, but push --set-upstream failed: {e}",
+                "warning",
+            )
+
+        self.git_widget.update_status()
 
     def action_open_checkout_modal(self) -> None:
         self.push_screen(
