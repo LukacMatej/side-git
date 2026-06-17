@@ -2,13 +2,13 @@
 
 A small, always-on git status panel for KDE Konsole. Run it from inside a repo and it splits your Konsole tab, dropping a live-updating branch/staged/unstaged/unpushed view into the new pane, with one-key actions for the things you do most.
 
-![gitsidebar running next to a code editor, showing the active branch, staged and unstaged files, and a keybinding legend](assets/demo.png)
+![side-git running next to a code editor, showing the active branch, staged and unstaged files, and a keybinding legend](assets/demo.jpeg)
 
 ## How it works
 
 Run it once, while sitting in a normal Konsole tab inside a git repo. It splits the window 70/30 via Konsole's D-Bus interface and relaunches itself in the new pane to show the status panel. If that's not possible for any reason — you're not in Konsole, `qdbus` isn't installed, the D-Bus call gets rejected — it just runs the panel in your current pane instead of doing nothing.
 
-![Diagram: a single terminal tab on the left, an arrow labeled "splits + relaunches itself" pointing to a 70/30 split terminal on the right showing the same shell next to a colored git status panel](assets/how-it-works.svg)
+![Diagram: a single terminal tab on the left, an arrow labeled "splits + relaunches itself" pointing to a 70/30 split terminal on the right showing the same shell next to a colored git status panel](assets/how-it-works.png)
 
 The panel refreshes on its own every couple of seconds, so it stays current as you edit and commit from the other pane.
 
