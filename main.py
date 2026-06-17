@@ -21,7 +21,7 @@ import time
 
 from git import InvalidGitRepositoryError, Repo
 from textual.app import App, ComposeResult
-from textual.containers import Container, Vertical
+from textual.containers import Container, Vertical, VerticalScroll
 from textual.screen import ModalScreen
 from textual.widgets import Input, Static
 
@@ -125,11 +125,24 @@ class GitSidebar(Static):
                 active_branch_name = repo.active_branch.name
 
             untracked = repo.untracked_files
-            modified = [item.a_path for item in repo.index.diff(None)]
-            staged = [item.a_path for item in repo.index.diff("HEAD")]
+            modified_diff = list(repo.index.diff(None))
+            staged_diff = list(repo.index.diff("HEAD"))
 
-            status_str = f"[bold cyan]ACTIVE BRANCH:[/bold cyan] [bold white]{active_branch_name}[/bold white]\n"
-            status_str += "\n[bold magenta]LOCAL BRANCHES:[/bold magenta]\n"
+            def describe(item):
+                """Return (letter, label) using the real change_type
+                (M/A/D/R/C/T) instead of assuming everything is modified."""
+                ct = item.change_type or "M"
+                if (
+                    ct == "R"
+                    and item.a_path
+                    and item.b_path
+                    and item.a_path != item.b_path
+                ):
+                    return ct, f"{item.a_path} -> {item.b_path}"
+                return ct, (item.b_path or item.a_path)
+
+            status_str = f"[bold cyan]\U0001f33f ACTIVE BRANCH:[/bold cyan] [bold white]{active_branch_name}[/bold white]\n"
+            status_str += "\n[bold magenta]\u2728 LOCAL BRANCHES:[/bold magenta]\n"
             try:
                 for b in repo.branches:
                     if b.name == active_branch_name:
@@ -139,27 +152,26 @@ class GitSidebar(Static):
             except Exception:
                 status_str += "  [gray](Unable to list branches)[/gray]\n"
 
-            status_str += "\n[bold green]STAGED TO BE COMMITTED:[/bold green]\n"
-            if staged:
-                for f in staged[:3]:
-                    status_str += f"  [green]+ {f}[/green]\n"
-                if len(staged) > 3:
-                    status_str += f"  ... and {len(staged) - 3} more\n"
+            status_str += "\n[bold green]\u2713 STAGED TO BE COMMITTED:[/bold green]\n"
+            if staged_diff:
+                for item in staged_diff:
+                    letter, label = describe(item)
+                    status_str += f"  [green]{letter} {label}[/green]\n"
             else:
                 status_str += "  [gray](None)[/gray]\n"
 
-            status_str += "\n[bold red]UNSTAGED CHANGES:[/bold red]\n"
-            total_unstaged = modified + untracked
-            if total_unstaged:
-                for f in total_unstaged[:3]:
-                    prefix = "?" if f in untracked else "M"
-                    status_str += f"  [red]{prefix} {f}[/red]\n"
-                if len(total_unstaged) > 3:
-                    status_str += f"  ... and {len(total_unstaged) - 3} more\n"
+            status_str += "\n[bold red]\u26a0\ufe0f UNSTAGED CHANGES:[/bold red]\n"
+            unstaged_entries = [describe(item) for item in modified_diff]
+            unstaged_entries += [("?", path) for path in untracked]
+            if unstaged_entries:
+                for letter, label in unstaged_entries:
+                    status_str += f"  [red]{letter} {label}[/red]\n"
             else:
                 status_str += "  [green](Workspace clean)[/green]\n"
 
-            status_str += "\n[bold yellow]UNPUSHED LOCAL COMMITS:[/bold yellow]\n"
+            status_str += (
+                "\n[bold yellow]\U0001f680 UNPUSHED LOCAL COMMITS:[/bold yellow]\n"
+            )
             try:
                 if not repo.head.is_detached:
                     local_branch = repo.active_branch
@@ -169,12 +181,8 @@ class GitSidebar(Static):
                             repo.iter_commits(f"{upstream.name}..{local_branch.name}")
                         )
                         if unpushed_commits:
-                            for c in unpushed_commits[:2]:
+                            for c in unpushed_commits:
                                 status_str += f"  [yellow]^ {c.hexsha[:7]}[/yellow] - {c.summary}\n"
-                            if len(unpushed_commits) > 2:
-                                status_str += (
-                                    f"  ... and {len(unpushed_commits) - 2} more\n"
-                                )
                         else:
                             status_str += (
                                 "  [green](All sync'd with remote origin)[/green]\n"
@@ -187,7 +195,7 @@ class GitSidebar(Static):
                 status_str += "  [gray](Unable to parse remote logs)[/gray]\n"
 
             status_str += (
-                "\n[bold magenta]WORKSPACE:[/bold magenta]      [bold magenta]BRANCHES:[/bold magenta]\n"
+                "\n[bold magenta]\u2328\ufe0f WORKSPACE:[/bold magenta]      [bold magenta]\U0001f33f BRANCHES:[/bold magenta]\n"
                 "------------------  -------------------\n"
                 "[bold]\\[A][/bold] Stage All\n[bold]\\[B][/bold] New Branch\n"
                 "[bold]\\[C][/bold] Commit Staged\n[bold]\\[O][/bold] Checkout Branch\n"
@@ -200,7 +208,7 @@ class GitSidebar(Static):
 
         except InvalidGitRepositoryError:
             self.update(
-                "[bold red]Not a Git Repository[/bold red]\n\nPress [bold]\\[Q][/bold] to exit."
+                "[bold red]\u274c Not a Git Repository[/bold red]\n\nPress [bold]\\[Q][/bold] to exit."
             )
 
     def on_mount(self) -> None:
@@ -217,8 +225,11 @@ class SidebarApp(App):
         height: 100%;
         layout: vertical;
     }
-    GitSidebar {
+    #status-scroll {
         height: 1fr;
+    }
+    GitSidebar {
+        height: auto;
     }
     """
 
@@ -240,8 +251,14 @@ class SidebarApp(App):
         self.git_widget = GitSidebar()
         self.notifier = NotificationBanner()
         with Container(id="main-layout"):
-            yield self.git_widget
+            with VerticalScroll(id="status-scroll"):
+                yield self.git_widget
             yield self.notifier
+
+    def on_mount(self) -> None:
+        # Keep the panel live even if nothing is pressed - e.g. you edit
+        # or commit from the other pane and want the sidebar to catch up.
+        self.set_interval(2.0, self.git_widget.update_status)
 
     def get_repo(self):
         return Repo(os.getcwd(), search_parent_directories=True)
