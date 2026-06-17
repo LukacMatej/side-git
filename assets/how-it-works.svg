@@ -1,0 +1,54 @@
+<svg viewBox="0 0 820 300" xmlns="http://www.w3.org/2000/svg" font-family="Menlo, Consolas, monospace">
+  <rect width="820" height="300" fill="#0d0d0d"/>
+
+  <!-- BEFORE: single full-width pane -->
+  <rect x="20" y="40" width="280" height="200" rx="6" fill="#141414" stroke="#3a3a3a" stroke-width="1.5"/>
+  <rect x="20" y="40" width="280" height="22" rx="6" fill="#1f1f1f"/>
+  <circle cx="34" cy="51" r="4" fill="#ff5f56"/>
+  <circle cx="48" cy="51" r="4" fill="#ffbd2e"/>
+  <circle cx="62" cy="51" r="4" fill="#27c93f"/>
+  <text x="160" y="56" fill="#888" font-size="11" text-anchor="middle">konsole</text>
+
+  <text x="34" y="86" fill="#888" font-size="12">$ cd myrepo</text>
+  <text x="34" y="104" fill="#888" font-size="12">$ vim main.py</text>
+  <text x="34" y="140" fill="#dcdcdc" font-size="12">def main():</text>
+  <text x="34" y="158" fill="#dcdcdc" font-size="12">    ...</text>
+  <text x="34" y="196" fill="#00bcff" font-size="12">$ gitsidebar</text>
+  <rect x="106" y="187" width="7" height="13" fill="#00bcff"/>
+
+  <text x="160" y="270" fill="#666" font-size="12" text-anchor="middle">one normal terminal tab</text>
+
+  <!-- ARROW -->
+  <line x1="318" y1="140" x2="378" y2="140" stroke="#00bcff" stroke-width="2"/>
+  <polygon points="378,134 392,140 378,146" fill="#00bcff"/>
+  <text x="355" y="120" fill="#00bcff" font-size="11" text-anchor="middle">splits + relaunches</text>
+  <text x="355" y="166" fill="#00bcff" font-size="11" text-anchor="middle">itself, --sidebar</text>
+
+  <!-- AFTER: split window -->
+  <rect x="410" y="40" width="390" height="200" rx="6" fill="#141414" stroke="#3a3a3a" stroke-width="1.5"/>
+  <rect x="410" y="40" width="390" height="22" rx="6" fill="#1f1f1f"/>
+  <circle cx="424" cy="51" r="4" fill="#ff5f56"/>
+  <circle cx="438" cy="51" r="4" fill="#ffbd2e"/>
+  <circle cx="452" cy="51" r="4" fill="#27c93f"/>
+  <text x="605" y="56" fill="#888" font-size="11" text-anchor="middle">konsole</text>
+
+  <!-- left ~70% : your shell -->
+  <line x1="685" y1="62" x2="685" y2="240" stroke="#3a3a3a" stroke-width="1.5"/>
+  <text x="424" y="86" fill="#888" font-size="12">$ vim main.py</text>
+  <text x="424" y="122" fill="#dcdcdc" font-size="12">def main():</text>
+  <text x="424" y="140" fill="#dcdcdc" font-size="12">    ...</text>
+  <text x="550" y="216" fill="#555" font-size="11" text-anchor="middle">~70% width, your work</text>
+
+  <!-- right ~30% : sidebar -->
+  <text x="700" y="80" fill="#00bcff" font-size="11">ACTIVE BRANCH</text>
+  <text x="700" y="93" fill="#fff" font-size="11">main</text>
+  <text x="700" y="116" fill="#00cc66" font-size="11">STAGED</text>
+  <text x="700" y="129" fill="#9aff9a" font-size="10">+ main.py</text>
+  <text x="700" y="152" fill="#ff5b5b" font-size="11">UNSTAGED</text>
+  <text x="700" y="165" fill="#ff9a9a" font-size="10">M sidebar.py</text>
+  <text x="700" y="188" fill="#ffb300" font-size="11">UNPUSHED</text>
+  <text x="700" y="201" fill="#ffe1a3" font-size="10">^ a1b2c3d</text>
+  <text x="745" y="225" fill="#555" font-size="9" text-anchor="middle">refreshes every 2s</text>
+
+  <text x="605" y="270" fill="#666" font-size="12" text-anchor="middle">same tab, now split 70 / 30</text>
+</svg>
