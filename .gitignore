@@ -1,0 +1,4 @@
+.venv
+side-git.spec
+dist
+build
